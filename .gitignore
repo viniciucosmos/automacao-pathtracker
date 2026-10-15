@@ -1,0 +1,44 @@
+# Credenciais e variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Python: arquivos compilados e cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Arquivos de configuração e cache de ferramentas
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Logs
+*.log
+logs/
+
+# Arquivos temporários e backups
+*.tmp
+*.bak
+~$*
+
+# Configurações locais de editores
+.vscode/
+.idea/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Arquivos Excel temporários
+~$*.xlsx
+~$*.xlsm
+
+*.xlsx
+*.xls
+*.xlsm

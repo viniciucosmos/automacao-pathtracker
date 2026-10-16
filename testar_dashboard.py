@@ -5,11 +5,17 @@ from selenium.webdriver.support import expected_conditions as EC
 
 import config
 import traceback
+import time
 
 driver = webdriver.Chrome()
 wait = WebDriverWait(driver, config.TEMPO_LIMITE)
 
+data_rota = input(
+            "Digite a data da rota (dd/mm/aaaa): "
+        ).strip()
+
 try:
+
     print("ETAPA 1: Abrindo o portal...")
     driver.maximize_window()
     driver.get(config.PATHTRACKER_URL)
@@ -110,6 +116,71 @@ try:
     print("Quantidade de vendedores encontrados:", len(codigos))
     print("Códigos dos vendedores:", codigos)
 
+##
+    print("\nETAPA 9: Selecionando a data da rota...")
+
+    # Localiza o campo de data do Dashboard
+    campo_data = wait.until(
+        EC.visibility_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "input.form-control[data-bind='value : selectedDate']"
+            )
+        )
+    )
+
+    # Preenche a data informada
+    campo_data.clear()
+    campo_data.send_keys(data_rota)
+
+    print("Data preenchida:", campo_data.get_attribute("value"))
+
+    # Localiza e clica no botão de atualização
+    botao_atualizar = wait.until(
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "div.dashboard-sellers-button.filterButton button"
+            )
+        )
+    )
+
+    botao_atualizar.click()
+
+    #@@
+
+    print("Aguardando o Dashboard atualizar...")
+    time.sleep(5)
+
+    print("Data exibida após a atualização:",
+        campo_data.get_attribute("value"))
+
+    clientes_tela = driver.find_elements(
+        By.CSS_SELECTOR,
+        "div.table-cell[data-bind='html: sale']"
+    )
+
+    print("Elementos de clientes encontrados:", len(clientes_tela))
+
+    com_status = 0
+
+    for cliente in clientes_tela:
+        html = cliente.get_attribute("innerHTML") or ""
+
+        if "Não visitado" in html:
+            com_status += 1
+
+    print("Elementos contendo 'Não visitado':", com_status)
+
+    if clientes_tela:
+        print("\nAmostra do HTML do primeiro cliente:")
+        print(
+            (clientes_tela[0].get_attribute("innerHTML") or "")[:1000]
+        )
+    #@@
+
+    print("Botão de atualização clicado.")
+
 ##  
     print("\nETAPA 8: Associando clientes aos vendedores...")
 
@@ -191,8 +262,6 @@ try:
             f"Cliente: {item['codigo_cliente']} | "
             f"Nome: {item['nome_comercial']}"
         )
-
-##
 
     input("Confira o dashboard. Pressione ENTER para fechar...")
     

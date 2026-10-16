@@ -91,6 +91,109 @@ try:
     print("Dashboard aberto com sucesso!")
     print("URL atual:", driver.current_url)
 
+    ##
+    
+    print("\nETAPA 7: Lendo os códigos dos vendedores...")
+
+    vendedores = wait.until(
+        EC.presence_of_all_elements_located(
+            (By.CSS_SELECTOR, "span[data-bind='text: sellerCode']")
+        )
+    )
+
+    codigos = [
+        vendedor.text.strip()
+        for vendedor in vendedores
+        if vendedor.text.strip()
+    ]
+
+    print("Quantidade de vendedores encontrados:", len(codigos))
+    print("Códigos dos vendedores:", codigos)
+
+##  
+    print("\nETAPA 8: Associando clientes aos vendedores...")
+
+    vendedores = driver.find_elements(
+        By.CSS_SELECTOR,
+        "span[data-bind='text: sellerCode']"
+    )
+
+    resultado = []
+
+    for vendedor in vendedores:
+        codigo_vendedor = vendedor.get_attribute("textContent").strip()
+
+        linha = vendedor.find_element(
+            By.XPATH,
+            "./ancestor::tr[1]"
+        )
+
+        clientes = linha.find_elements(
+            By.CSS_SELECTOR,
+            "div.table-cell[data-bind='html: sale']"
+        )
+
+        encontrados_vendedor = 0
+
+        for cliente in clientes:
+            html = cliente.get_attribute("innerHTML") or ""
+
+            if "Não visitado" not in html:
+                continue
+
+            identificacao = cliente.find_elements(
+                By.CSS_SELECTOR,
+                "p.message > b"
+            )
+
+            nomes = cliente.find_elements(
+                By.CSS_SELECTOR,
+                "p.message > strong"
+            )
+
+            if not identificacao or not nomes:
+                continue
+
+            codigo_e_nome = identificacao[0].get_attribute(
+                "textContent"
+            ).strip()
+
+            nome_comercial = nomes[0].get_attribute(
+                "textContent"
+            ).strip()
+
+            partes = codigo_e_nome.split(maxsplit=1)
+
+            if len(partes) < 2:
+                continue
+
+            resultado.append({
+                "vendedor": codigo_vendedor,
+                "codigo_cliente": partes[0],
+                "nome_comercial": nome_comercial
+            })
+
+            encontrados_vendedor += 1
+
+        print(
+            f"Vendedor {codigo_vendedor}: "
+            f"{len(clientes)} clientes na linha, "
+            f"{encontrados_vendedor} não visitados."
+        )
+
+   
+    print("\nTotal de clientes não visitados:", len(resultado))
+    print("\nLista completa de clientes não visitados:")
+
+    for item in resultado:
+        print(
+            f"Vendedor: {item['vendedor']} | "
+            f"Cliente: {item['codigo_cliente']} | "
+            f"Nome: {item['nome_comercial']}"
+        )
+
+##
+
     input("Confira o dashboard. Pressione ENTER para fechar...")
     
 except Exception:
